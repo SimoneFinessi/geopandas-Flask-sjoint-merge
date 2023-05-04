@@ -33,7 +33,6 @@ def es2():
 @app.route("/immagineEs2", methods = ['GET'])
 def immagineEs2():
     farm=request.args["farmacia"]
-    print(farm)
     fig , ax = plt.subplots()
     geodf[geodf.FARMACIA.str.contains(farm)].to_crs(3857).plot(ax=ax)
     ctx.add_basemap(ax=ax)
@@ -42,5 +41,19 @@ def immagineEs2():
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
+@app.route('/es3')
+def es3():
+    return render_template("es3.html",farmacia=farm)
+
+@app.route("/immagineEs3")
+def immagineEs3():
+    fig, ax=plt.subplots()
+    comuni[comuni.intersects(geodf.to_crs(32632).unary_union)].to_crs(3857).plot(ax=ax,edgecolor="black",alpha=0.3)
+    geodf.to_crs(3857).plot(ax=ax,color="Red",markersize=1)
+    ctx.add_basemap(ax=ax)
+
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
 if __name__ == '__main__':
     app.run(debug=True)
