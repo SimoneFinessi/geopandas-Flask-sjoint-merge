@@ -83,5 +83,19 @@ def immagineEs5():
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
+
+@app.route('/es6')
+def es6():
+    return render_template("es6.html")
+
+@app.route("/immagineEs6")
+def immagineEs6():
+    fig , ax=plt.subplots()
+    ax.pie(nfarm.FARMACIA,labels=nfarm.COMUNE)
+    plt.show()
+
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
 if __name__ == '__main__':
     app.run(debug=True)
