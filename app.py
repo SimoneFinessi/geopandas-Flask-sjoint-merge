@@ -69,17 +69,19 @@ def es4():
 
 @app.route('/es5')
 def es5():
-    return render_template("es3.html")
+    return render_template("es5.html")
 
 @app.route("/immagineEs5")
 def immagineEs5():
     finale=comuni.merge(nfarm,on="COMUNE")
-    ax=finale[finale.intersects(geodf.to_crs(32632).unary_union)].to_crs(3857).plot(edgecolor="black",alpha=0.3,column="FARMACIA",legend=True)
+    fig , ax=plt.subplots()
+    finale[finale.intersects(geodf.to_crs(32632).unary_union)].to_crs(3857).plot(ax=ax,edgecolor="black",alpha=0.3,column="FARMACIA",legend=True)
     geodf.to_crs(3857).plot(ax=ax,color="Red",markersize=1)
     ctx.add_basemap(ax=ax)
 
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
+
 if __name__ == '__main__':
     app.run(debug=True)
