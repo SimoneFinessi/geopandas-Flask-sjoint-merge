@@ -16,6 +16,9 @@ comuni=gpd.read_file("/workspace/geopandas-Flask-sjoint-merge/Com01012022_g.zip"
 df2=df[(df.LATITUDINE_P!="-") & (df.LONGITUDINE_P!="-") ]
 geometry = [Point(xy) for xy in zip(df2.LONGITUDINE_P, df2.LATITUDINE_P)]
 geodf = gpd.GeoDataFrame(df2, crs=4326, geometry=geometry)
+geodf=geodf.drop("COMUNE", axis=1)
+joint=gpd.sjoin(geodf.to_crs(32632),comuni,predicate="intersects",how="left")
+nfarm=joint.groupby("COMUNE")[["FARMACIA"]].count().reset_index()
 
 @app.route('/')
 def home():
@@ -59,16 +62,22 @@ def immagineEs3():
 
 @app.route('/es4')
 def es4():
-    global geodf
-    geodf=geodf.drop("COMUNE", axis=1)
-    joint=gpd.sjoin(geodf.to_crs(32632),comuni,predicate="intersects",how="left")
-    nfarm=joint.groupby("COMUNE")[["FARMACIA"]].count().reset_index()
+    global nfarm
+    
     trovato=nfarm.to_html()
     return render_template("risultati.html",risultato=trovato)
 
+@app.route('/es5')
+def es5():
+    return render_template("es3.html")
+
 @app.route("/immagineEs5")
 def immagineEs5():
-   
+    finale=comuni.merge(nfarm,on="COMUNE")
+    ax=finale[finale.intersects(geodf.to_crs(32632).unary_union)].to_crs(3857).plot(edgecolor="black",alpha=0.3,column="FARMACIA",legend=True)
+    geodf.to_crs(3857).plot(ax=ax,color="Red",markersize=1)
+    ctx.add_basemap(ax=ax)
+
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
