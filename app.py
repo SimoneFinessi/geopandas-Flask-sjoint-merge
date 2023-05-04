@@ -16,6 +16,7 @@ comuni=gpd.read_file("/workspace/geopandas-Flask-sjoint-merge/Com01012022_g.zip"
 df2=df[(df.LATITUDINE_P!="-") & (df.LONGITUDINE_P!="-") ]
 geometry = [Point(xy) for xy in zip(df2.LONGITUDINE_P, df2.LATITUDINE_P)]
 geodf = gpd.GeoDataFrame(df2, crs=4326, geometry=geometry)
+
 @app.route('/')
 def home():
     return render_template("home.html")
@@ -52,6 +53,22 @@ def immagineEs3():
     geodf.to_crs(3857).plot(ax=ax,color="Red",markersize=1)
     ctx.add_basemap(ax=ax)
 
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/es4')
+def es4():
+    global geodf
+    geodf=geodf.drop("COMUNE", axis=1)
+    joint=gpd.sjoin(geodf.to_crs(32632),comuni,predicate="intersects",how="left")
+    nfarm=joint.groupby("COMUNE")[["FARMACIA"]].count().reset_index()
+    trovato=nfarm.to_html()
+    return render_template("risultati.html",risultato=trovato)
+
+@app.route("/immagineEs5")
+def immagineEs5():
+   
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
