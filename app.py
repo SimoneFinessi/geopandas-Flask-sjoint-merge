@@ -43,7 +43,7 @@ def immagineEs2():
 
 @app.route('/es3')
 def es3():
-    return render_template("es3.html",farmacia=farm)
+    return render_template("es3.html")
 
 @app.route("/immagineEs3")
 def immagineEs3():
