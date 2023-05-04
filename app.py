@@ -30,14 +30,17 @@ def es2():
     farm=request.form["farmacia"]
     return render_template("es2.html",farmacia=farm)
 
-@app.route("/immagineEs2", methods = ['POST'])
+@app.route("/immagineEs2", methods = ['GET'])
 def immagineEs2():
-    farm=request.form["farmacia"]
-    fig,ax= plt.subplot()
-    geodf[geodf.FARMACIA.str.contains(far)].to_crs(3857).plot(ax=ax)
+    farm=request.args["farmacia"]
+    print(farm)
+    fig , ax = plt.subplots()
+    geodf[geodf.FARMACIA.str.contains(farm)].to_crs(3857).plot(ax=ax)
     ctx.add_basemap(ax=ax)
+
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
+
 if __name__ == '__main__':
     app.run(debug=True)
